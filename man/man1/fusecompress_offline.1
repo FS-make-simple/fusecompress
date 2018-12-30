@@ -1,0 +1,36 @@
+.TH FUSECOMPRESS_OFFLINE 1 "2012-04-12" "0.9.2" "Compressed filesystem offline"
+.SH NAME
+fusecompress_offline \- decompress or compress data without need to mount the compressed virtual filesystem
+.SH DESCRIPTION
+If compression method is set the data will be compressed by required compression method. Files already compressed by a different compression method are recompressed to the required compression method. Files already compressed by the required compression method are left untouched.
+If compression method is not set (using -o fc_c) then file(s) are decompressed.
+
+Path may be directory or file. Directories are processed recursively.
+.SH SYNOPSIS
+.B fusecompress_offline
+[OPTIONS] [path...]
+.SH OPTIONS
+.TP
+\-c lzo/gz/bz2/lzma/null
+Compress file using the given method
+.TP
+\-r lzo/gz/bz2/lzma/null
+Recompress file in given format
+.TP
+\-l LEVEL
+Specifies compression level
+.TP
+\-v
+Report progress
+
+Lzo is the fastest, bzip2 has high compression ratio, but it is the slowest, zlib is somewhere between them in terms of speed and compression ratio and lzma has highest compression ratio, it's compression speed is better than bzip2 and decompression is fast.
+
+Block size influences compression ratio. Bigger block size allows better compression ratio, but random access to data will be slower and memory requirements will be bigger.
+
+.SH DISCLAIMER
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  Please refer to the "COPYING" file distributed with fusecompress for complete details.
+.SH AUTHORS
+fusecompress_offline was written by Milan Svoboda <milan.svoboda@centrum.cz>.
+.SH "SEE ALSO"
+fusecompress,
+fsck.fusecompress

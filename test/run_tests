@@ -1,0 +1,36 @@
+#!/bin/bash
+fusermount -u test 2>/dev/null
+rm -fr test
+fail=0
+for i in *.py *.sh
+do
+	echo -n "${i}: "
+	if test ${i#*.} = py
+	then
+		python $i >$i.log 2>&1
+	elif test ${i#*.} = sh
+	then
+		bash -e $i >$i.log 2>&1
+	else
+		echo "don't know how to run $i"
+		exit 1
+	fi
+	ret=$?
+	if test $ret != 0
+	then
+		if test $ret = 2
+		then
+			echo "SKIP"
+			rm $i.log
+		else
+			echo "FAIL"
+			fusermount -z -u test
+			mv test test.$i
+			fail=1
+		fi
+	else
+		echo "PASS"
+		rm $i.log
+	fi
+done
+exit $fail

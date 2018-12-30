@@ -1,0 +1,29 @@
+.TH FSCK.FUSECOMPRESS 1 "2012-04-12" "0.9.2" "Compressed filesystem"
+.SH NAME
+fsck.fusecompress \- check an compressed virtual filesystem
+.SH SYNOPSIS
+.B fsck.fusecompress
+[-dv] directory
+.SH OPTIONS
+.TP
+-d
+Remove unfixable or superfluous broken files
+.TP
+-p
+Fix fixable files
+.TP
+-r
+Rebuild deduplication database
+.TP
+-l
+Deduplicate files while building database
+.TP
+-v
+Be verbose
+.SH DISCLAIMER
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  Please refer to the "COPYING" file distributed with fusecompress for complete details.
+.SH AUTHORS
+fusecompress was written by Milan Svoboda <milan.svoboda@centrum.cz>.
+.SH "SEE ALSO"
+fusecompress,
+fusecompress_offline

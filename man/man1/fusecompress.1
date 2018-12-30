@@ -1,0 +1,112 @@
+.TH FUSECOMPRESS 1 "2012-04-12" "0.9.2" "Compressed filesystem"
+.SH NAME
+fusecompress \- mounts an compressed virtual filesystem
+.SH DESCRIPTION
+FuseCompress creates a virtual compressed filesystem which stores compressed data in the rootDir directory and makes the uncompressed data visible at the mountPoint directory.
+
+Compression type (or uncompressed state) of files in the rootDir is not changed during work. Use fusecompress_offline if you want to decompress file(s) or change compression type of the file(s).
+.SH SYNOPSIS
+.B fusecompress
+[OPTIONS] /storage/directory [/mount/point]
+.SH OPTIONS
+.TP
+.B \-h
+print this help
+.TP
+.B \-v
+print version
+.TP
+.B \-c lzo/bz2/gz/lzma/null
+choose default compression method
+.TP
+.B \-l LEVEL
+set compression level (1 to 9)
+.TP
+.B \-d
+detach
+.TP
+.B \-f
+nodetach
+.TP
+.B \-o ...
+pass arguments to fuse library
+.PP
+Fusecompress line options:
+.TP
+.B {ro,rw}
+{Read only, read-write} mode.
+.TP
+.B uncompressed_binaries
+No compress binary files.
+.TP
+.B {cache_skipped,cache}
+No cache.
+.TP
+.B cache_size=len
+Cache size MB.
+.TP
+.B level={1,9}
+Compression level.
+.TP
+.B {detach,nodetach}
+Detach mode.
+.TP
+.B {lzo,lzma,bz2,gz,null}
+Compression algoritm.
+.TP
+.B {noterm,term}
+Term mode.
+.TP
+.B maxcompress=len
+Maximum compress size MB.
+.TP
+.B nocompext=ext
+No compress file *.ext.
+.TP
+.B exclude=ext
+Exclude files *.ext.
+.TP
+.B dedup,redup
+Deduplicate options.
+.PP
+Useful parameters for fuse library:
+Fuse library must be configured to support this features - configuration file /etc/fuse.conf must contains at least this option: user_allow_other.
+.TP
+.B allow_other
+This option overrides the security measure restricting file access to the user mounting the filesystem. So all users (including root) can access the files. This option is by default only allowed to root, but this restriction can be removed with a configuration option described in the previous section.
+.TP
+.B allow_root
+This option is similar to 'allow_other' but file access is limited to the user mounting the filesystem and root. This option and 'allow_other' are mutually exclusive.
+.TP
+.B nonempty
+This option allows you to use the same directory for rootDir and mountPoint.
+.SH EXAMPLES
+
+Storage directory is /tmp/fc and mount point is /mnt/fc in all following examples.
+
+    o Mount directory:
+
+        fusecompress /tmp/fc /mnt/fc
+
+    o Unmount directory:
+
+        fusermount \-u /mnt/fc
+
+    o Line in /etc/fstab:
+
+        fusecompress#/tmp/fc  /mnt/fc  fuse  allow_other  0  0
+
+.B Tips and tricks:
+
+Lzo is the fastest, bzip2 has high compression ratio, but it is the slowest, zlib is somewhere between them in terms of speed and compression ratio and lzma has highest compression ratio, it's compression speed is better than bzip2 and decompression is fast. The none compression method is there for testing only as it doesn't compress data, it copies the data without any modification (fusecompress' header is added).
+
+Block size influences compression ratio. Bigger block size allows better compression ratio, but random access to data will be slower and memory requirements will be bigger.
+
+.SH DISCLAIMER
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  Please refer to the "COPYING" file distributed with fusecompress for complete details.
+.SH AUTHORS
+fusecompress was written by Milan Svoboda <milan.svoboda@centrum.cz>.
+.SH "SEE ALSO"
+fusecompress_offline,
+fsck.fusecompress
+
