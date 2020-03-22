@@ -40,8 +40,8 @@ void *thread_compress(void *arg);
 
 #define FUSECOMPRESS_PREFIX "._fC"
 
-#define TEMP FUSECOMPRESS_PREFIX "tmp"		/* Template is: ._.tmpXXXXXX */
-#define FUSE ".fuse_hidden"	/* Temporary FUSE file */
+#define TEMP FUSECOMPRESS_PREFIX "tmp"        /* Template is: ._.tmpXXXXXX */
+#define FUSE ".fuse_hidden"    /* Temporary FUSE file */
 #define DEDUP_DB_FILE FUSECOMPRESS_PREFIX "dedup_db"
 #define DEDUP_ATTR FUSECOMPRESS_PREFIX "at_"
 
@@ -51,9 +51,9 @@ extern char compresslevel[];
 // Gcc optimizations
 //
 #if __GNUC__ >= 3
-# define likely(x)	__builtin_expect (!!(x), 1)
-# define unlikely(x)	__builtin_expect (!!(x), 0)
+# define likely(x)    __builtin_expect (!!(x), 1)
+# define unlikely(x)    __builtin_expect (!!(x), 0)
 #else
-# define likely(x)	(x)
-# define unlikely(x)	(x)
+# define likely(x)    (x)
+# define unlikely(x)    (x)
 #endif

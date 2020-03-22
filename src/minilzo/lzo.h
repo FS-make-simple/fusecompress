@@ -19,33 +19,37 @@
 extern "C" {
 #endif
 
-typedef struct {
-	uint64_t	usize;
-	uint64_t	psize;
-} lzoHead;
+    typedef struct
+    {
+        uint64_t    usize;
+        uint64_t    psize;
+    } lzoHead;
 
-typedef struct {
-	char		*buf;
-	uint64_t	 usize;	/* For write: size of buffer */
-	uint64_t	 psize;	/* For write: number of stored bytes */
-} lzoBlock;
+    typedef struct
+    {
+        char        *buf;
+        uint64_t     usize;    /* For write: size of buffer */
+        uint64_t     psize;    /* For write: number of stored bytes */
+    } lzoBlock;
 
-enum lzoMode {
-	LZO_READ,
-	LZO_WRITE,
-};
+    enum lzoMode
+    {
+        LZO_READ,
+        LZO_WRITE,
+    };
 
-typedef struct {
-	int		fd;
-	enum lzoMode	mode;
-	lzoBlock	block;
-	uint64_t	blockoff;
-} lzoFile;
+    typedef struct
+    {
+        int        fd;
+        enum lzoMode    mode;
+        lzoBlock    block;
+        uint64_t    blockoff;
+    } lzoFile;
 
-lzoFile* lzodopen(int fd, const char *mode);
-int lzoclose(lzoFile *file);
-int lzowrite(lzoFile *file, char *buf, unsigned buf_len);
-int lzoread(lzoFile *file, char *buf, unsigned buf_len);
+    lzoFile* lzodopen(int fd, const char *mode);
+    int lzoclose(lzoFile *file);
+    int lzowrite(lzoFile *file, char *buf, unsigned buf_len);
+    int lzoread(lzoFile *file, char *buf, unsigned buf_len);
 
 #ifdef __cplusplus
 }

@@ -42,22 +42,22 @@ extern int _debug_on;
 #define barf(t,x...) syslog(t, x)
 #endif
 
-#define WARN_(fmt,...)				\
-	barf(LOG_WARNING, "WARN %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
+#define WARN_(fmt,...)                \
+    barf(LOG_WARNING, "WARN %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
 
-#define ERR_(fmt,...)				\
-	barf(LOG_ERR, "ERR %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
+#define ERR_(fmt,...)                \
+    barf(LOG_ERR, "ERR %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
 
 #define MAX_ERRORS_PER_FILE 100
-#define FILEERR_(file, fmt, ...)		\
-	if (file->errors_reported == MAX_ERRORS_PER_FILE) { file->errors_reported++; ERR_("too many errors for file %s, squelching", file->filename); }	\
-	else if (file->errors_reported < MAX_ERRORS_PER_FILE) { file->errors_reported++; ERR_(fmt, ## __VA_ARGS__); }
+#define FILEERR_(file, fmt, ...)        \
+    if (file->errors_reported == MAX_ERRORS_PER_FILE) { file->errors_reported++; ERR_("too many errors for file %s, squelching", file->filename); }    \
+    else if (file->errors_reported < MAX_ERRORS_PER_FILE) { file->errors_reported++; ERR_(fmt, ## __VA_ARGS__); }
 
-#define CRIT_(fmt,...)				\
-	barf(LOG_CRIT, "CRIT: %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
-	
-#define INFO_(fmt,...)				\
-	barf(LOG_INFO, "INFO: %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
+#define CRIT_(fmt,...)                \
+    barf(LOG_CRIT, "CRIT: %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
+
+#define INFO_(fmt,...)                \
+    barf(LOG_INFO, "INFO: %s %d: " fmt, __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__);
 
 // ------------------- Statistics -------------------------
 
@@ -65,34 +65,34 @@ extern int _debug_on;
 
 #include <pthread.h>
 
-#define STAT_GETATTR			1
-#define STAT_UNLINK			2
-#define STAT_RENAME			3
-#define STAT_TRUNCATE			4
-#define STAT_OPEN			5
-#define STAT_RELEASE			6
-#define STAT_READ			7
-#define STAT_WRITE			8
-#define STAT_DECOMPRESS			9
-#define STAT_BACKGROUND_COMPRESS	10
-#define STAT_BACKGROUND_COMPRESS_QUEUE	11
-#define STAT_DIRECT_OPEN_ALLOC		12
-#define STAT_DIRECT_READ		13
-#define STAT_DIRECT_WRITE		14
-#define STAT_FALLBACK			15
-#define STAT_COMPRESS			16
-#define STAT_DO_DEDUP			17
-#define STAT_DO_UNDEDUP			18
-#define STAT_DEDUP_DISCARD		19
+#define STAT_GETATTR            1
+#define STAT_UNLINK            2
+#define STAT_RENAME            3
+#define STAT_TRUNCATE            4
+#define STAT_OPEN            5
+#define STAT_RELEASE            6
+#define STAT_READ            7
+#define STAT_WRITE            8
+#define STAT_DECOMPRESS            9
+#define STAT_BACKGROUND_COMPRESS    10
+#define STAT_BACKGROUND_COMPRESS_QUEUE    11
+#define STAT_DIRECT_OPEN_ALLOC        12
+#define STAT_DIRECT_READ        13
+#define STAT_DIRECT_WRITE        14
+#define STAT_FALLBACK            15
+#define STAT_COMPRESS            16
+#define STAT_DO_DEDUP            17
+#define STAT_DO_UNDEDUP            18
+#define STAT_DEDUP_DISCARD        19
 
-#define STAT_MAX			19
+#define STAT_MAX            19
 
-#define STAT_(index)	statistics[index-1].count++;
+#define STAT_(index)    statistics[index-1].count++;
 
 typedef struct
 {
-	unsigned int count;
-	const char *name;
+    unsigned int count;
+    const char *name;
 } statistic_t;
 
 // The statistics array is not protected with mutex, this is only

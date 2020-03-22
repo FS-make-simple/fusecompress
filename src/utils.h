@@ -16,16 +16,18 @@ static inline char *strestr(const char *haystack, const char *needle)
  */
 static inline unsigned int gethash(const char *ptr, int *len)
 {
-	unsigned int hash = 0;
-	const char *start = ptr;
+    unsigned int hash = 0;
+    const char *start = ptr;
 
-	do {
-		hash = 31 * hash + *ptr;
-		ptr++;
-	} while  (*ptr);
+    do
+    {
+        hash = 31 * hash + *ptr;
+        ptr++;
+    }
+    while  (*ptr);
 
-	*len = ptr - start + 1;
-	return hash;
+    *len = ptr - start + 1;
+    return hash;
 }
 
 #include "config.h"

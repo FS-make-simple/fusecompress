@@ -13,14 +13,14 @@
 #include "structs.h"
 #include "compress.h"
 
-pthread_t           pt_comp;	/* compress thread */
+pthread_t           pt_comp;    /* compress thread */
 pthread_mutexattr_t locktype;
 
 // Files smaller than this are not compressed
 //
 int min_filesize_background;
 
-int read_only;	/* set if mounted read-only to avoid temporary decompression of files */
+int read_only;    /* set if mounted read-only to avoid temporary decompression of files */
 int cache_decompressed_data;
 int decomp_cache_size;
 int max_decomp_cache_size;
@@ -34,31 +34,33 @@ compressor_t *compressor_default = NULL;
 // it is vital to sort modules according it's type. E.g. module_null
 // has type 0x0 or module_gzip has type 0x02.
 //
-compressor_t *compressors[5] = {
-	&module_null,
+compressor_t *compressors[5] =
+{
+    &module_null,
 #ifdef HAVE_BZIP2
-	&module_bz2,
+    &module_bz2,
 #else
-	NULL,
+    NULL,
 #endif
 #ifdef HAVE_ZLIB
-	&module_gzip,
+    &module_gzip,
 #else
-	NULL,
+    NULL,
 #endif
 #ifdef HAVE_LZO2
-	&module_lzo,
+    &module_lzo,
 #else
-	NULL,
+    NULL,
 #endif
 #ifdef HAVE_LZMA
-	&module_lzma,
+    &module_lzma,
 #else
-	NULL,
+    NULL,
 #endif
 };
 
-char *incompressible[] = {
+char *incompressible[] =
+{
     /* audio */
     ".mp3", ".ogg", ".wma" /* check */, ".m4a", ".mp2",
     /* media */
@@ -79,9 +81,9 @@ char *incompressible[] = {
     /* other */
     ".torrent",
     /* on probation */
-    ".pack",	/* git .pack files don't compress, but there may be other
+    ".pack",    /* git .pack files don't compress, but there may be other
                    kinds of files with this extension. */
-    ".wmv",	/* Intuitively, you'd say this won't compress at all, but I
+    ".wmv",    /* Intuitively, you'd say this won't compress at all, but I
                    have a screencast file here that compresses down to 30%
                    the original size with LZMA. */
     NULL
@@ -90,33 +92,37 @@ char *incompressible[] = {
 char **user_incompressible = NULL;
 char **user_exclude_paths = NULL;
 
-int root_fs;	/* set if you do not want to compress shared objects or binaries in mmapped_dirs[] */
-char *mmapped_dirs[] = {
+int root_fs;    /* set if you do not want to compress shared objects or binaries in mmapped_dirs[] */
+char *mmapped_dirs[] =
+{
     "bin/", "sbin/", "usr/bin/", "usr/sbin/", NULL
 };
 
 size_t dont_compress_beyond; /* maximum size of files to compress in the bg compress thread */
 
-database_t database = {
-	.head = LIST_HEAD_INIT(database.head),
-	.lock = PTHREAD_MUTEX_INITIALIZER,
-	.cond = PTHREAD_COND_INITIALIZER,		// Not used
-	.entries = 0,
+database_t database =
+{
+    .head = LIST_HEAD_INIT(database.head),
+    .lock = PTHREAD_MUTEX_INITIALIZER,
+    .cond = PTHREAD_COND_INITIALIZER,        // Not used
+    .entries = 0,
 };
 
-database_t comp_database = {
-	.head = LIST_HEAD_INIT(comp_database.head),
-	.lock = PTHREAD_MUTEX_INITIALIZER,
-	.cond = PTHREAD_COND_INITIALIZER,		// When new item is added to the list
-	.entries = 0,
+database_t comp_database =
+{
+    .head = LIST_HEAD_INIT(comp_database.head),
+    .lock = PTHREAD_MUTEX_INITIALIZER,
+    .cond = PTHREAD_COND_INITIALIZER,        // When new item is added to the list
+    .entries = 0,
 };
 
 #ifdef WITH_DEDUP
-dedup_hash_t dedup_database = {
-        /* .head_filename[] and .head_md5[] cannot be initialized statically */
-	.lock = PTHREAD_MUTEX_INITIALIZER,
-	.cond = PTHREAD_COND_INITIALIZER,		// When new item is added to the list
-	.entries = 0,
+dedup_hash_t dedup_database =
+{
+    /* .head_filename[] and .head_md5[] cannot be initialized statically */
+    .lock = PTHREAD_MUTEX_INITIALIZER,
+    .cond = PTHREAD_COND_INITIALIZER,        // When new item is added to the list
+    .entries = 0,
 };
 #endif
 

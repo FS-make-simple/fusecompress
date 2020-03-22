@@ -47,130 +47,133 @@
  */
 void background_compress_dedup(file_t *file, int dedup)
 {
-	compress_t *entry;
+    compress_t *entry;
 
-	// This function must be called with read lock
-	//
-	NEED_LOCK(&file->lock);
+    // This function must be called with read lock
+    //
+    NEED_LOCK(&file->lock);
 
-	DEBUG_("add '%s' to compress queue", file->filename);
+    DEBUG_("add '%s' to compress queue", file->filename);
 
-	/* For compression entries, compressor must not be set. */
-	assert(dedup || !file->compressor);
+    /* For compression entries, compressor must not be set. */
+    assert(dedup || !file->compressor);
 
-	// Increase accesses by 1, so entry is not flushed from the database.
-	//
-	file->accesses++;
+    // Increase accesses by 1, so entry is not flushed from the database.
+    //
+    file->accesses++;
 
-	entry = (compress_t *) malloc(sizeof(compress_t));
-	if (!entry)
-	{
-		ERR_("malloc failed!");
-		return;
-	}
-	entry->file = file;
-	entry->is_dedup = dedup;
+    entry = (compress_t *) malloc(sizeof(compress_t));
+    if (!entry)
+    {
+        ERR_("malloc failed!");
+        return;
+    }
+    entry->file = file;
+    entry->is_dedup = dedup;
 
-	// Add us to the database
-	//
-	LOCK(&comp_database.lock);
-	list_add_tail(&entry->list, &comp_database.head);
-	pthread_cond_signal(&comp_database.cond);
-	comp_database.entries++;
-	UNLOCK(&comp_database.lock);
+    // Add us to the database
+    //
+    LOCK(&comp_database.lock);
+    list_add_tail(&entry->list, &comp_database.head);
+    pthread_cond_signal(&comp_database.cond);
+    comp_database.entries++;
+    UNLOCK(&comp_database.lock);
 }
 
 void background_compress(file_t *file)
 {
-	background_compress_dedup(file, 0);
+    background_compress_dedup(file, 0);
 }
 
 void background_dedup(file_t *file)
 {
-	background_compress_dedup(file, 1);
+    background_compress_dedup(file, 1);
 }
 
 void *thread_compress(void *arg)
 {
-	file_t     *file;
-	compress_t *entry;
-	
-	while (TRUE)
-	{
-		// Lock compressor database and check for new entries
-		//
-		LOCK(&comp_database.lock);
+    file_t     *file;
+    compress_t *entry;
 
-		// Wait for new entry in database
-		//
-		while (list_empty(&comp_database.head))
-		{
-			pthread_cond_wait(&comp_database.cond, &comp_database.lock);
-		}
-		STAT_(STAT_BACKGROUND_COMPRESS);
+    while (TRUE)
+    {
+        // Lock compressor database and check for new entries
+        //
+        LOCK(&comp_database.lock);
 
-		// Grab first comp_entry
-		//
-		entry = list_entry((&comp_database.head)->next, typeof(*entry), list);
-		assert(entry);
-		
-		// Get file from entry
-		//
-		file = entry->file;
-		assert(file);
+        // Wait for new entry in database
+        //
+        while (list_empty(&comp_database.head))
+        {
+            pthread_cond_wait(&comp_database.cond, &comp_database.lock);
+        }
+        STAT_(STAT_BACKGROUND_COMPRESS);
 
-		// We have file, we can delete and free entry
-		//
-		list_del(&entry->list);
-		comp_database.entries--;
+        // Grab first comp_entry
+        //
+        entry = list_entry((&comp_database.head)->next, typeof(*entry), list);
+        assert(entry);
 
-		UNLOCK(&comp_database.lock);
+        // Get file from entry
+        //
+        file = entry->file;
+        assert(file);
 
-		// This is safe, entry cannot be freed because entry->accesses++ in
-		// background_compress_dedup()
-		//
-		LOCK(&file->lock);
+        // We have file, we can delete and free entry
+        //
+        list_del(&entry->list);
+        comp_database.entries--;
 
-		// entry->accesses must be > 0 because it was added
-		// by background_compress_dedup()
-		//
-		assert(file->accesses > 0);
+        UNLOCK(&comp_database.lock);
+
+        // This is safe, entry cannot be freed because entry->accesses++ in
+        // background_compress_dedup()
+        //
+        LOCK(&file->lock);
+
+        // entry->accesses must be > 0 because it was added
+        // by background_compress_dedup()
+        //
+        assert(file->accesses > 0);
 
 #ifdef WITH_DEDUP
-		if (!entry->is_dedup) {
+        if (!entry->is_dedup)
+        {
 #endif
-		        /* compression entry */
-		        
-			// If entry->accesses = 1 we're the only one accessing it, also only
-			// try to compress files that hasn't been deleted
-			// and hasn't been compressed
-			//
-			if ((file->accesses == 1) && (!file->deleted) && (!file->compressor) &&
-			    (dont_compress_beyond == -1 || file->size < dont_compress_beyond) )
-			{
-				DEBUG_("compressing '%s'", file->filename);
-				do_compress(file);
-			}
+            /* compression entry */
+
+            // If entry->accesses = 1 we're the only one accessing it, also only
+            // try to compress files that hasn't been deleted
+            // and hasn't been compressed
+            //
+            if ((file->accesses == 1) && (!file->deleted) && (!file->compressor) &&
+                    (dont_compress_beyond == -1 || file->size < dont_compress_beyond) )
+            {
+                DEBUG_("compressing '%s'", file->filename);
+                do_compress(file);
+            }
 #ifdef WITH_DEDUP
-                        if (dedup_enabled)
-                                dedup_discard(file);
-		}
-		else {
-		        /* deduplication entry */
-			if (file->accesses == 1 && !file->deleted) {
-				DEBUG_("deduping '%s'", file->filename);
-				do_dedup(file);
-			}
-		}
+            if (dedup_enabled)
+                dedup_discard(file);
+        }
+        else
+        {
+            /* deduplication entry */
+            if (file->accesses == 1 && !file->deleted)
+            {
+                DEBUG_("deduping '%s'", file->filename);
+                do_dedup(file);
+            }
+        }
 #endif
-		free(entry);
+        free(entry);
 
-		// Restore entry->accesses to original value
-		// (@see background_compress_dedup())
-		//
-		file->accesses--;
+        // Restore entry->accesses to original value
+        // (@see background_compress_dedup())
+        //
+        file->accesses--;
 
-		UNLOCK(&file->lock);
-	}
+        UNLOCK(&file->lock);
+    }
 
 }
